@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from "react";
-import DashboardLayout from "../componenets/DashboardLayout";
+import DashboardLayout from "../components/DashboardLayout";
 import { useNavigate } from "react-router-dom";
-import { LucideFilePlus, LucideTrash, LucideTrash2 } from "lucide-react";
+import { LucideFilePlus, LucideTrash2 } from "lucide-react";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPath";
-import { ResumeSummaryCard } from "../componenets/Cards";
+import { ResumeSummaryCard } from "../components/Cards";
 import toast from "react-hot-toast";
 import moment from "moment";
-import { Modal } from "../componenets/Modal";
-import {CreateResumeForm }from "../componenets/CreateResumeForm";
+import { Modal } from "../components/Modal";
+import { CreateResumeForm } from "../components/CreateResumeForm";
 const Dashboard = () => {
   const navigate = useNavigate();
   const [allResume, setAllResume] = useState([]);
   const [openCreateModal, setOpenCreateModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resumeToDelete, setResumeToDelete] = useState(null);
-  const [setshowDeleteConfirm, setSetshowDeleteConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const calculateCompletion = (resume) => {
     let completedFields = 0;
@@ -109,23 +109,25 @@ const Dashboard = () => {
     fetchAllResumes();
   }, []);
 
-  const handleDelete = async () => {
+  const handleDeleteResume = async () => {
     if (!resumeToDelete) return;
     try {
       await axiosInstance.delete(API_PATHS.RESUME.DELETE(resumeToDelete));
       toast.success("Resume deleted successfully");
+      setAllResume((prev) => prev.filter((r) => r._id !== resumeToDelete));
+      fetchAllResumes();
     } catch (error) {
       console.error("Error deleting resume", error);
       toast.error("failed to delete resume");
     } finally {
       setResumeToDelete(null);
-      setshowDeleteConfirm(false);
+      setShowDeleteConfirm(false);
     }
   };
 
   const handleDeleteClick = (id) => {
     setResumeToDelete(id);
-    setSetshowDeleteConfirm(true);
+    setShowDeleteConfirm(true);
   };
 
   return (
@@ -175,8 +177,8 @@ const Dashboard = () => {
               No Resumes Yet
             </h3>
             <p className="text-gray-600 max-w-md mb-6">
-              You havent created any resumes yet. Start building your
-              professional resume to lan your dream job.
+              "You haven't created any resumes yet. Start building your
+              professional resume to land your dream job."
             </p>
             <button
               className="group relative px-10 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold rounded-2xl overflow-hidden transition-all hover:scale-105 hover:shadow-2xl hover:shadow-violet-200"
@@ -197,7 +199,10 @@ const Dashboard = () => {
         {/* Grid View */}
         {!loading && allResume.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="flex flex-col items-center justify-center bg-gradient-to-br from-violet-50 to-blue-50 border-2 border-dashed border-violet-300 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg hover:border-violet-500 h-full">
+            <div
+              className="flex flex-col items-center justify-center bg-gradient-to-br from-violet-50 to-blue-50 border-2 border-dashed border-violet-300 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg hover:border-violet-500 h-full"
+              onClick={() => setOpenCreateModal(true)}
+            >
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 flex items-center justify-center mb-4">
                 <LucideFilePlus size={32} className="text-white" />
               </div>
@@ -208,7 +213,7 @@ const Dashboard = () => {
                 Start building your career
               </p>
             </div>
-            {allResume.map((resume) => {
+            {allResume.map((resume) => (
               <ResumeSummaryCard
                 key={resume._id}
                 imgUrl={resume.thumbnailLink}
@@ -216,14 +221,12 @@ const Dashboard = () => {
                 createdAt={resume.createdAt}
                 updatedAt={resume.updatedAt}
                 onSelect={() => navigate(`/resume/${resume._id}`)}
-                onDelete={() => {
-                  handleDeleteClick(resume._id);
-                }}
+                onDelete={() => handleDeleteClick(resume._id)}
                 completion={resume.completion || 0}
                 isPremium={resume.isPremium}
                 isNew={moment().diff(moment(resume.createdAt), "days") < 7}
-              />;
-            })}
+              />
+            ))}
           </div>
         )}
       </div>
@@ -258,21 +261,26 @@ const Dashboard = () => {
 
       {/* delete Modal */}
       <Modal
-        isOpen={setshowDeleteConfirm}
-        onClose={() => setSetshowDeleteConfirm(false)}
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
         title="Confirm Deletion"
-        showActionBtn actionBtnText='Delete'
-        actionBtnClassName='bg-red-600 hover:bg-red-700'
-        onActionClick={handleDeleteClick}
+        showActionBtn
+        actionBtnText="Delete"
+        actionBtnClassName="bg-red-600 hover:bg-red-700"
+        onActionClick={handleDeleteResume}
       >
         <div className="p-4">
           <div className="flex flex-col items-center text-center">
-              <div className="bg-red-100 p-3 rounded-full mb-4">
-                <LucideTrash2 className="text-orange-600" size={24} />
-                <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Resume?</h3>
-                <p className="text-gray-600 mb-4">Are you sure you want to delete this resume? This action cannot be undone.  </p>
-
-              </div>
+            <div className="bg-red-100 p-3 rounded-full mb-4">
+              <LucideTrash2 className="text-orange-600" size={24} />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              Delete Resume?
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Are you sure you want to delete this resume? This action cannot be
+              undone.{" "}
+            </p>
           </div>
         </div>
       </Modal>

@@ -10,10 +10,10 @@ import {
 import { useState } from "react";
 import { useActionData, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
-import { ProfileCard } from "../componenets/Cards";
-import {Modal} from "../componenets/Modal";
-import Login from "../componenets/Login";
-import SignUp from "../componenets/SignUp";
+import { ProfileCard } from "../components/Cards";
+import { Modal } from "../components/Modal";
+import Login from "../components/Login";
+import SignUp from "../components/SignUp";
 
 const LandingPage = () => {
   const { user } = useContext(UserContext);
@@ -495,11 +495,16 @@ const LandingPage = () => {
           onClose={() => {
             setOpenAuthModal(false);
             setCurrentPage("login");
-          }} hideHeader
+          }}
+          hideHeader
         >
           <div>
-            {currentPage==="login" && <Login setCurrentPage={setCurrentPage}/>}
-            {currentPage==="signup" && <SignUp setCurrentPage={setCurrentPage}/>}
+            {currentPage === "login" && (
+              <Login setCurrentPage={setCurrentPage} />
+            )}
+            {currentPage === "signup" && (
+              <SignUp setCurrentPage={setCurrentPage} />
+            )}
           </div>
         </Modal>
       </main>
