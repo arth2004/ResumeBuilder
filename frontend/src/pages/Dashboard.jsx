@@ -20,7 +20,7 @@ const Dashboard = () => {
   const calculateCompletion = (resume) => {
     let completedFields = 0;
     let totalFields = 0;
-
+    
     // Profile Info
     totalFields += 3;
     if (resume.profileInfo?.fullName) completedFields++;
