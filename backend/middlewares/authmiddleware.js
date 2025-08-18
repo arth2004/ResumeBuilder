@@ -5,7 +5,7 @@ import { asyncHandler } from "./asyncHandler.js";
 export const protect = asyncHandler(async (req, res, next) => {
   let token;
   token = req.cookies.jwt;
-  console.log(token);
+  console.log("token",token);
   if (!token) {
     res.status(401);
     throw new Error("Not authorized, no token");
