@@ -61,31 +61,39 @@ export const registerUser = asyncHandler(async (req, res) => {
 // @desc    Login user
 // @route   POST /api/users/login
 // @access  Public
-export const loginUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+// inside authRoutes.js
+router.post("/login", async (req, res, next) => {
+  console.log("Login request received:", req.body);
 
-  const user = await User.findOne({ email });
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
-  if (!user) {
-    res.status(401);
-    throw new Error("Invalid email");
+    if (!user) {
+      console.log("User not found");
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const match = await user.matchPassword(password);
+    if (!match) {
+      console.log("Password mismatch");
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // generate cookie
+    generateToken(res, user._id);
+    console.log("Token set in cookie");
+
+    res.status(200).json({
+      success: true,
+      user: { id: user._id, email: user.email },
+    });
+  } catch (err) {
+    console.error("Login error:", err);
+    next(err);
   }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-
-  if (!isMatch) {
-    res.status(401);
-    throw new Error("Invalid password");
-  }
-
-  generateToken(res, user._id);
-  res.json({
-    success: true,
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-  });
 });
+
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
