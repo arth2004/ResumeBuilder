@@ -2,25 +2,55 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import DashboardLayout from "./DashboardLayout";
 import { TitleInput } from "./Inputs";
 import { useNavigate, useParams } from "react-router-dom";
-import { Download, Palette, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Check,
+  Download,
+  Loader,
+  Loader2,
+  Palette,
+  Save,
+  Trash2,
+} from "lucide-react";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPath";
 import toast from "react-hot-toast";
 import { fixTailwindColors } from "../utils/colors";
 import html2pdf from "html2pdf.js";
+import html2canvas from "html2canvas";
+import StepProgress from "./StepProgress";
+import {
+  AdditionalInfoForm,
+  CertificationInfoForm,
+  ContactInfoForm,
+  EducationDetailsForm,
+  ProfileInfoForm,
+  ProjectDetailForm,
+  SkillsInfoForm,
+  WorkExperienceForm,
+} from "./Forms";
+import RenderResume from "./RenderResume";
+import { Modal } from "./Modal";
+import ThemeSelector from "./ThemeSelector";
+import { dataURLtoFile } from "../utils/helper";
 
 //Resize observer hook
 const useResizeObserver = () => {
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const ref = useCallback((node) => {
-    if (node) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        const { width, height } = entries[0].contentRect;
-        setSize({ width, height });
-      });
-      resizeObserver.observe(node);
-    }
-  }, []);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const ro = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      setSize({ width, height });
+    });
+    ro.observe(node);
+    return () => ro.disconnect();
+  }, [ref.current]);
+
   return { ...size, ref };
 };
 
@@ -181,7 +211,8 @@ export const EditResume = () => {
       (i) => i.trim() !== ""
     ).length;
 
-    const percentage = Math.round((completedFields / totalFields) * 100);
+    const percentage =
+      totalFields === 0 ? 0 : Math.round((completedFields / totalFields) * 100);
     setCompletionPercentage(percentage);
     return percentage;
   };
@@ -211,9 +242,9 @@ export const EditResume = () => {
     switch (currentPage) {
       case "profile-info":
         const { fullName, designation, summary } = resumeData.profileInfo;
-        if (!fullName.trim()) errors.push("Full Name is required");
-        if (!designation.trim()) errors.push("Designation is required");
-        if (!summary.trim()) errors.push("Summary is required");
+        if (!fullName?.trim()) errors.push("Full Name is required");
+        if (!designation?.trim()) errors.push("Designation is required");
+        if (!summary?.trim()) errors.push("Summary is required");
         break;
 
       case "contact-info":
@@ -333,7 +364,6 @@ export const EditResume = () => {
     if (currentIndex !== -1 && currentIndex < pages.length - 1) {
       const nextIndex = currentIndex + 1;
       setCurrentPage(pages[nextIndex]);
-
       const percent = Math.round((nextIndex / (pages.length - 1)) * 100);
       setProgress(percent);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -571,7 +601,8 @@ export const EditResume = () => {
         logging: false,
       });
 
-      document.body.removeChild(fixedThumbnail);
+      if (fixedThumbnail && fixedThumbnail.parentNode)
+        fixedThumbnail.parentNode.removeChild(fixedThumbnail);
 
       const thumbnailDataUrl = thumbnailCanvas.toDataURL("image/png");
       const thumbnailFile = dataURLtoFile(
@@ -586,7 +617,8 @@ export const EditResume = () => {
         API_PATHS.RESUME.UPLOAD_IMAGES(resumeId),
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          // headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true,
         }
       );
 
@@ -605,8 +637,7 @@ export const EditResume = () => {
 
   const updateResumeDetails = async (thumbnailLink) => {
     try {
-      setIsLoading(true);
-
+      // setIsLoading(true);
       await axiosInstance.put(API_PATHS.RESUME.UPDATE(resumeId), {
         ...resumeData,
         thumbnailLink: thumbnailLink || "",
@@ -622,14 +653,14 @@ export const EditResume = () => {
 
   const downloadPDF = async () => {
     const element = resumeDownloadRef.current;
+    console.log(element);
     if (!element) {
       toast.error("Failed to generate PDF. Please try again.");
       return;
     }
-
     setIsDownloading(true);
     setDownloadSuccess(false);
-    const toastId = toast.loading("Generating PDFâ€¦");
+    const toastId = toast.loading("Generating PDF...");
 
     const override = document.createElement("style");
     override.id = "__pdf_color_override__";
@@ -735,6 +766,151 @@ export const EditResume = () => {
           </div>
         </div>
         {/* Step Progress */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="bg-white border border-violet-100 rounded-2xl overflow-hidden shadow-sm">
+            <StepProgress progress={progress} />
+            {renderForm()}
+            <div className="p-4 sm:p-6">
+              {errorMsg && (
+                <div className="flex items-center gap-3 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 px-4 py-3 rounded-xl mb-4">
+                  <AlertCircle size={10} />
+                  {errorMsg}
+                </div>
+              )}
+              <div className="flex flex-wrap items-center justify-end gap-3">
+                <button
+                  className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all text-sm"
+                  onClick={goBack}
+                  disabled={isLoading}
+                >
+                  <ArrowLeft size={16} />
+                  Back
+                </button>
+                <button
+                  className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-100 text-blue-700 font-bold rounded-xl hover:bg-blue-200 transition-all text-sm"
+                  onClick={uploadResumeImages}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader size={16} className="animate-spin" />
+                  ) : (
+                    <Save size={16} />
+                  )}
+                  {isLoading ? "Saving..." : "Save and Exit"}
+                </button>
+                <button
+                  className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-bold rounded-xl hover:scale-105 transition-all shadow-lg text-sm"
+                  onClick={validateAndNext}
+                  disabled={isLoading}
+                >
+                  {currentPage === "additionalInfo" && <Download size={16} />}
+                  {currentPage === "additionalInfo"
+                    ? "Preview & Download"
+                    : "Next"}
+                  {currentPage === "additionalInfo" && (
+                    <ArrowLeft size={16} className="rotate-180" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="lg:block">
+            <div className="bg-white border border-violet-100 rounded-2xl overflow-hidden shadow-sm p-4">
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full text-sm font-medium text-gray-700">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                  <span className="">
+                    Preview-{completionPercentage}% Complete
+                  </span>
+                </div>
+              </div>
+              <div
+                className="preview-container relative"
+                ref={previewContainerRef}
+              >
+                <div className="w-full max-w-[800px] mx-auto">
+                  <RenderResume
+                    key={`preview${resumeData?.template?.theme}`}
+                    templateId={resumeData?.template?.theme || ""}
+                    resumeData={resumeData}
+                    containerWidth={previewWidth}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal Data */}
+      <Modal
+        isOpen={openThemeSelector}
+        onClose={() => setOpenThemeSelector(false)}
+        title="Change Title"
+      >
+        <div className="w-[90vw] h-[80vh]">
+          <ThemeSelector
+            selectedTheme={resumeData?.template.theme}
+            setSelectedTheme={updateTheme}
+            onClose={() => setOpenThemeSelector(false)}
+          />
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={openPreviewModal}
+        onClose={() => setOpenPreviewModal(false)}
+        title={resumeData.title}
+        showActionBtn
+        actionBtnText={
+          isLoading
+            ? "Generating..."
+            : downloadSuccess
+            ? "Downloaded!"
+            : "Download PDF"
+        }
+        actionBtnIcon={
+          isDownloading ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : downloadSuccess ? (
+            <Check size={16} className="text-white" />
+          ) : (
+            <Download size={16} />
+          )
+        }
+        onActionClick={downloadPDF}
+      >
+        <div className="relative">
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center gap-2 bg-violet-100 px-3 py-1 rounded-full text-sm font-medium text-violet-700">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span>Completion:{completionPercentage}%</span>
+            </div>
+          </div>
+          <div className="w-full p-4 flex justify-center">
+            <div className="a4-wrapper" ref={resumeDownloadRef}>
+              <div className="w-full h-full">
+                <RenderResume
+                  key={`pdf-${resumeData?.template?.theme}`}
+                  templateId={resumeData?.template?.theme || ""}
+                  resumeData={resumeData}
+                  containerWidth={null}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Thumbnail error fix */}
+      <div style={{ display: "none" }} ref={thumbnailRef}>
+        <div className="bg-white shadow-lg max-w-[400px] mx-auto">
+          <RenderResume
+            key={`theme-${resumeData.template?.theme}`}
+            templateId={resumeData?.template?.theme || ""}
+            resumeData={resumeData}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );

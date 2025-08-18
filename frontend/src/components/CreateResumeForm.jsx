@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPath";
 import { useState } from "react";
-import Inputs from "./Inputs";
+import {Input} from "./Inputs";
 
 export const CreateResumeForm = () => {
   const [title, setTitle] = useState("");
@@ -38,7 +38,7 @@ export const CreateResumeForm = () => {
         later.
       </p>
       <form onSubmit={handleCreateResume}>
-        <Inputs
+        <Input
           value={title}
           onChange={({ target }) => setTitle(target.value)}
           label="Resume Title"

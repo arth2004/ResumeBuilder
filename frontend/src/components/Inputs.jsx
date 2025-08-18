@@ -1,7 +1,7 @@
 import { Check, Edit, Eye, EyeOff } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
-const Inputs = ({ value, onChange, label, placeholder, type = "text" }) => {
+export const Input = ({ value, onChange, label, placeholder, type = "text" }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   return (
@@ -43,7 +43,7 @@ const Inputs = ({ value, onChange, label, placeholder, type = "text" }) => {
   );
 };
 
-export default Inputs;
+
 
 export const ProfilePhotoSelector = ({ image, setImage, preview, setPreview }) => {
   const inputRef = useRef(null);

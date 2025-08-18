@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPath";
-import Inputs from "./Inputs";
+import {Input} from "./Inputs";
 import { validateEmail } from "../utils/helper";
 
 const Login = ({ setCurrentPage: setCurrentPage }) => {
@@ -50,14 +50,14 @@ const Login = ({ setCurrentPage: setCurrentPage }) => {
       </div>
       {/* Form */}
       <form onSubmit={handleLogin} className="space-y-6">
-        <Inputs
+        <Input
           value={email}
           onChange={({ target }) => setEmail(target.value)}
           label="Email"
           placeholder="johnDoe@example.com"
           type="email"
         />
-        <Inputs
+        <Input
           value={password}
           onChange={({ target }) => setPassword(target.value)}
           label="Password"

@@ -30,6 +30,6 @@ router.put("/:id", updateResume);
 router.delete("/:id", deleteResume);
 
 // Upload resume images (thumbnail/profile)
-router.post("/:id/upload-images", uploadResumeImages);
+router.put("/:id/upload-images", uploadResumeImages);
 
 export default router;

@@ -4,7 +4,7 @@ import { UserContext } from "../context/userContext";
 import { validateEmail } from "../utils/helper";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPath";
-import Inputs from "./Inputs";
+import {Input} from "./Inputs";
 
 const SignUp = ({ setCurrentPage }) => {
   const [fullName, setFullName] = useState("");
@@ -64,21 +64,21 @@ const SignUp = ({ setCurrentPage }) => {
       </div>
       {/* Form */}
       <form onSubmit={handleSignup} className="space-y-4">
-        <Inputs
+        <Input
           value={fullName}
           onChange={({ target }) => setFullName(target.value)}
           label="Full Name"
           placeholder="John Doe"
           type="text"
         />
-        <Inputs
+        <Input
           value={email}
           onChange={({ target }) => setEmail(target.value)}
           label="Email"
           placeholder="example@example.com"
           type="email"
         />
-        <Inputs
+        <Input
           value={password}
           onChange={({ target }) => setPassword(target.value)}
           label="Password"
