@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173","https://resumebuilder-frontend-8vou.onrender.com"],
   credentials: true, // Allow cookies to be sent
 }));
 app.use(express.json());
