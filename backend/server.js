@@ -16,8 +16,8 @@ app.use(cors({
   origin: ["http://localhost:5173","https://resumebuilder-frontend-8vou.onrender.com"],
   credentials: true, // Allow cookies to be sent
 }));
-app.use(express.json());
 app.use(cookieParser());
+app.use(express.json());
 const PORT = process.env.PORT || 5000;
 //Connection
 connectDb();
