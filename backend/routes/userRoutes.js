@@ -3,6 +3,7 @@ import { registerUser, loginUser, getUserProfile, generateToken } from "../contr
 import { protect } from "../middlewares/authmiddleware.js";
 import User from "../models/userModel.js";
 const router = express.Router();
+import bcrypt from "bcryptjs";
 
 router.post("/register", registerUser);
 // inside authRoutes.js
@@ -18,8 +19,8 @@ router.post("/login", async (req, res, next) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const match = await user.matchPassword(password);
-    if (!match) {
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
       console.log("Password mismatch");
       return res.status(401).json({ message: "Invalid email or password" });
     }
