@@ -32,7 +32,7 @@ app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"), {
     setHeaders: (res, _path) => {
-      res.set("Access-Control-Allow-Origin", "http://loacalhost:5173");
+      res.set("Access-Control-Allow-Origin", "https://resumebuilder-frontend-8vou.onrender.com");
     },
   })
 );
