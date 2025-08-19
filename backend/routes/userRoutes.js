@@ -1,44 +1,10 @@
 import express from "express";
-import { registerUser, loginUser, getUserProfile, generateToken } from "../controllers/userController.js";
-import { protect } from "../middlewares/authmiddleware.js";
-import User from "../models/userModel.js";
+import { registerUser, loginUser } from "../controllers/userController.js";
+
 const router = express.Router();
-import bcrypt from "bcryptjs";
 
 router.post("/register", registerUser);
 // inside authRoutes.js
-router.post("/login", async (req, res, next) => {
-  console.log("Login request received:", req.body);
-
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      console.log("User not found");
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      console.log("Password mismatch");
-      return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    // generate cookie
-    generateToken(res, user._id);
-    console.log("Token set in cookie");
-
-    res.status(200).json({
-      success: true,
-      user: { id: user._id, email: user.email },
-    });
-  } catch (err) {
-    console.error("Login error:", err);
-    next(err);
-  }
-});
-;
-router.get("/profile", protect, getUserProfile);
+router.post("/login", loginUser);
 
 export default router;
