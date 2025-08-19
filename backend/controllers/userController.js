@@ -13,10 +13,11 @@ export const generateToken = (res, userId) => {
   // Store token in HTTP-only cookie
   res.cookie("jwt", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
+    secure: true,
+    sameSite: "None",
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   });
+  return token;
 };
 
 // @desc    Register a new user
@@ -63,6 +64,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/login
 // @access  Public
 export const loginUser = asyncHandler(async (req, res) => {
+  console.log("Login attempt with body:", req.body)
   const { email, password } = req.body;
 
   const user = await User.findOne({ email });
@@ -80,6 +82,7 @@ export const loginUser = asyncHandler(async (req, res) => {
   }
 
   const token = generateToken(res, user._id);
+  
   res.json({
     success: true,
     _id: user._id,
