@@ -12,9 +12,23 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://resume-builder-alpha-hazel.vercel.app",
+  "https://resumebuilder-frontend-8vou.onrender.com"
+];
+
 app.use(cors({
-  origin: ["http://localhost:5173","https://resume-builder-alpha-hazel.vercel.app"],
-  credentials: true, // Allow cookies to be sent
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
 }));
 
 // Extra headers to support Set-Cookie in cross-site requests

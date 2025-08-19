@@ -3,22 +3,23 @@ import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// Generate JWT token
 export const generateToken = (res, userId) => {
   const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: "30d",
   });
-  console.log("token generated" , token);
-  
-  // Store token in HTTP-only cookie
+
+  const isProd = process.env.NODE_ENV === "production";
+
   res.cookie("jwt", token, {
     httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    secure: isProd,
+    sameSite: isProd ? "None" : "Lax",
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   });
+
   return token;
 };
+
 
 // @desc    Register a new user
 // @route   POST /api/users

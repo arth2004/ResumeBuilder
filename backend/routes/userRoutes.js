@@ -12,5 +12,5 @@ router.post("/register", registerUser);
 // inside authRoutes.js
 router.post("/login", loginUser);
 
-router.post("/profile", protect, getUserProfile);
+router.get("/profile", protect, getUserProfile);
 export default router;
