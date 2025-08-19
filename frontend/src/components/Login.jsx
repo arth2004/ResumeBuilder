@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/userContext";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPath";
-import {Input} from "./Inputs";
+import { Input } from "./Inputs";
 import { validateEmail } from "../utils/helper";
 
 const Login = ({ setCurrentPage: setCurrentPage }) => {
@@ -25,10 +25,14 @@ const Login = ({ setCurrentPage: setCurrentPage }) => {
     }
     setError("");
     try {
-      const response = await axiosInstance.post(API_PATHS.Auth.LOGIN, {
-        email,
-        password,
-      });
+      const response = await axiosInstance.post(
+        API_PATHS.Auth.LOGIN,
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      );
       updateUser(response.data);
       navigate("/dashboard");
     } catch (error) {

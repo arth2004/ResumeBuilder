@@ -79,12 +79,13 @@ export const loginUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid password");
   }
 
-  generateToken(res, user._id);
+  const token = generateToken(res, user._id);
   res.json({
     success: true,
     _id: user._id,
     name: user.name,
     email: user.email,
+    token: token,
   });
 });
 
